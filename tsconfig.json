@@ -1,6 +1,7 @@
 {
   "include": ["src"],
   "compilerOptions": {
+    "declaration": true,
     "esModuleInterop": true,
     "lib": ["ES2018"],
     "moduleResolution": "node",

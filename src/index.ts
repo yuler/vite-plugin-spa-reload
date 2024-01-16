@@ -17,8 +17,31 @@ const getPackageVersion = function () {
   return JSON.parse(fs.readFileSync(filepath, 'utf-8')).version
 }
 
-const virtualModuleId = 'virtual:spa-reload'
-const resolvedVirtualModuleId = '\0' + virtualModuleId
+const generateCode = (options: Options) => `
+;(function main() {
+  polling()
+  setInterval(polling, ${options.interval}) // 30s
+}())
+
+let currentVersion = document.head.querySelector('meta[name="__version__"]')?.getAttribute('value') ?? ''
+
+async function polling() {
+  const response = await fetch('/')
+  const html = await response.text()
+  
+  const remoteVersion = html.match(/<meta name="__version__" value="(.*?)">/)?.[1] ?? ''
+
+  console.log({ currentVersion, remoteVersion })
+  if (currentVersion !== remoteVersion) {
+    const confirmed = confirm('New version is available, reload?')
+    if (confirmed) {
+      location.reload()
+    } else {
+      currentVersion = remoteVersion
+    }
+  }
+}
+`
 
 export default function reload(options: Options = {
   version: getCommitHash() || getPackageVersion(),
@@ -27,43 +50,17 @@ export default function reload(options: Options = {
 }): Plugin {
   return {
     name: 'vite-plugin-spa-reload',
-    resolveId(id: string) {
-      if (id === virtualModuleId) {
-        return resolvedVirtualModuleId
-      }
-    },
-    load(id: string) {
-      if (id === resolvedVirtualModuleId) {
-        return `export function enable() {
-          polling()
-          setInterval(polling, ${options.interval}) // 30s
-        }
-        
-        let currentVersion = document.head.querySelector('meta[name="__version__"]')?.getAttribute('value') ?? ''
-        async function polling() {
-          const response = await fetch('/')
-          const html = await response.text()
-          
-          const remoteVersion = html.match(/<meta name="__version__" value="(.*?)">/)?.[1] ?? ''
-        
-          console.log({ currentVersion, remoteVersion })
-          if (currentVersion !== remoteVersion) {
-            const confirmed = confirm('New version is available, reload?')
-            if (confirmed) {
-              location.reload()
-            } else {
-              currentVersion = remoteVersion
-            }
-          }
-        }`
-      }
-    },
     enforce: 'post',
     transformIndexHtml(html: string) {
-      return html.replace(
-        `<head>`,
-        `<head><meta name="__version__" value="${options.version}">`
-      )
+      return html
+        .replace(
+          `<head>`,
+          `<head><meta name="__version__" value="${options.version}">`
+        )
+        .replace(
+          '</body>',
+          `<script>${generateCode(options)}</script></body>`
+        )
     }
   }
 }
