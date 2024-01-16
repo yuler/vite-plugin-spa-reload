@@ -1,0 +1,28 @@
+{
+  "name": "vite-plugin-spa-reload",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "A Vite plugin check new version for reload in SPA.",
+  "keywords": [
+    "vite",
+    "vite-plugin",
+    "spa",
+    "reload"
+  ],
+  "main": "dist/index.js",
+  "license": "MIT",
+  "author": "yuler<is.yuler@gmail.com>",
+  "scripts": {
+    "build": "tsc --outDir dist",
+    "test": "echo TODO:",
+    "prepublish": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.3",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.11"
+  },
+  "peerDependencies": {
+    "vite": "^5.0.0"
+  }
+}
