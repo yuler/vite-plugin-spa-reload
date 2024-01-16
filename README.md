@@ -2,6 +2,11 @@
 
 A Vite plugin check new version for reload in SPA.
 
+## How it works?
+
+- First inject `<meta name="__version__" value="${options.version}">` to `index.html`
+- Then you can use `virtual:spa-reload` to enable polling for new check available version
+
 ## Usage
 
 ```bash
