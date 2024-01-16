@@ -29,9 +29,9 @@ export default {
 
 ```ts
 // main.ts
-import { enable as enableSpaReload } from 'virtual:spa-reload'
+import { enable as enableSPAReload } from 'virtual:spa-reload'
 
-enableSpaReload()
+enableSPAReload()
 ```
 
 ## Options
