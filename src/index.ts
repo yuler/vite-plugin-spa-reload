@@ -37,7 +37,7 @@ async function polling() {
 
   console.log({ currentVersion, remoteVersion })
   if (currentVersion !== remoteVersion) {
-    const confirmed = confirm(${options.message})
+    const confirmed = confirm('${options.message}')
     if (confirmed) {
       location.reload()
     } else {
