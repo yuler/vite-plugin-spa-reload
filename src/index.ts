@@ -10,7 +10,11 @@ interface Options {
 }
 
 const getCommitHash = function () {
-  return child_process.execSync('git rev-parse HEAD').toString().trim()
+  try {
+    return child_process.execSync('git rev-parse HEAD').toString().trim()
+  } catch {
+    return ''
+  }
 }
 const getPackageVersion = function () {
   const filepath = path.resolve(process.cwd(), './package.json')
@@ -33,7 +37,7 @@ async function polling() {
 
   console.log({ currentVersion, remoteVersion })
   if (currentVersion !== remoteVersion) {
-    const confirmed = confirm('New version is available, reload?')
+    const confirmed = confirm(${options.message})
     if (confirmed) {
       location.reload()
     } else {
@@ -43,11 +47,11 @@ async function polling() {
 }
 `
 
-export default function reload(options: Options = {
-  version: getCommitHash() || getPackageVersion(),
-  message: 'New version is available, reload?',
-  interval: 30000 // 30s
-}): Plugin {
+export default function reload({ 
+  version = getCommitHash() || getPackageVersion(),
+  message = 'New version is available, reload?',
+  interval = 30000
+}: Options = {}): Plugin {
   return {
     name: 'vite-plugin-spa-reload',
     enforce: 'post',
@@ -55,11 +59,11 @@ export default function reload(options: Options = {
       return html
         .replace(
           `<head>`,
-          `<head><meta name="__version__" value="${options.version}">`
+          `<head><meta name="__version__" value="${version}">`
         )
         .replace(
           '</body>',
-          `<script>${generateCode(options)}</script></body>`
+          `<script>${generateCode({ version, message, interval })}</script></body>`
         )
     }
   }
